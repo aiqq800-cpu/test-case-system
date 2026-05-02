@@ -5,30 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QA Manager — 測試管理系統</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ✅ 步驟一：把下面的 firebaseConfig 換成你自己的設定 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDJLeJhjMs89IVWVs09GQUfMq9tW2G8KGU",
+    authDomain: "testcasesystem-f2ce5.firebaseapp.com",
+    projectId: "testcasesystem-f2ce5",
+    storageBucket: "testcasesystem-f2ce5.firebasestorage.app",
+    messagingSenderId: "250049664160",
+    appId: "1:250049664160:web:e60b3074c0417caddee5c5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window._db = db;
+  window._fsHelpers = { collection, doc, getDocs, setDoc, deleteDoc, onSnapshot };
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#F7F6F3;
-  --surface:#FFFFFF;
-  --border:#E8E6E0;
-  --border-strong:#CCCAC3;
-  --text:#1A1917;
-  --text-2:#6B6960;
-  --text-3:#A8A69F;
-  --accent:#1E6B4E;
-  --accent-bg:#EBF5EF;
-  --accent-text:#1E6B4E;
-  --sidebar-w:230px;
-  --hdr:54px;
-  --font:'DM Sans',sans-serif;
-  --mono:'DM Mono',monospace;
-  --radius:8px;
-  --radius-lg:12px;
+  --bg:#F7F6F3;--surface:#FFFFFF;--border:#E8E6E0;--border-strong:#CCCAC3;
+  --text:#1A1917;--text-2:#6B6960;--text-3:#A8A69F;
+  --accent:#1E6B4E;--accent-bg:#EBF5EF;--accent-text:#1E6B4E;
+  --sidebar-w:230px;--hdr:54px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --radius:8px;--radius-lg:12px;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 .app{display:flex;flex:1;overflow:hidden}
-
-/* SIDEBAR */
 .sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .sidebar-brand{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .brand-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;flex-shrink:0}
@@ -38,15 +48,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .proj-item{padding:8px 10px;border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:9px;margin-bottom:1px;transition:all .15s}
 .proj-item:hover{background:var(--bg);color:var(--text)}
 .proj-item.active{background:var(--accent-bg);color:var(--accent-text);font-weight:500}
-.proj-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong);flex-shrink:0;transition:all .15s}
+.proj-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong);flex-shrink:0}
 .proj-item.active .proj-dot{background:var(--accent)}
 .proj-count{margin-left:auto;font-size:11px;background:var(--border);padding:1px 7px;border-radius:20px;color:var(--text-3)}
 .proj-item.active .proj-count{background:rgba(30,107,78,.15);color:var(--accent)}
 .sidebar-footer{padding:12px 8px;border-top:1px solid var(--border)}
 .add-proj-btn{width:100%;padding:8px 12px;border:1px dashed var(--border-strong);border-radius:var(--radius);background:transparent;cursor:pointer;font-size:13px;color:var(--text-3);font-family:var(--font);transition:all .15s}
 .add-proj-btn:hover{background:var(--bg);color:var(--text-2);border-color:var(--text-3)}
-
-/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:var(--hdr);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:4px;flex-shrink:0}
 .tab-btn{padding:6px 16px;border-radius:20px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-3);font-family:var(--font);transition:all .15s}
@@ -60,18 +68,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .btn:hover{background:var(--bg)}
 .btn-primary{background:var(--accent);color:#fff;border-color:transparent}
 .btn-primary:hover{opacity:.88}
+.btn-danger{background:#FEE2E2;color:#991B1B;border-color:transparent}
+.btn-danger:hover{opacity:.88}
 .content{flex:1;overflow-y:auto;padding:24px}
-
-/* TABLE */
 .tc-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .search-wrap{position:relative;flex:1;max-width:300px}
-.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;pointer-events:none}
 .search-box{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font);transition:border .15s;outline:none}
 .search-box:focus{border-color:var(--accent)}
 .filter-sel{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none;cursor:pointer}
-.filter-sel:focus{border-color:var(--accent)}
 .tc-count{margin-left:auto;font-size:12px;color:var(--text-3)}
-
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .tc-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 .tc-table th{text-align:left;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-weight:600;font-size:11px;color:var(--text-3);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
@@ -80,8 +85,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .tc-table tbody tr:hover td{background:#FAFAF8;cursor:pointer}
 .id-cell{font-family:var(--mono);font-size:11px;color:var(--text-3)}
 .title-cell{font-weight:500;color:var(--text)}
-
-/* BADGES */
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
 .p-critical{background:#FEE2E2;color:#991B1B}
 .p-high{background:#FEF3C7;color:#92400E}
@@ -93,15 +96,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .ai-tag{background:#EDE9FE;color:#5B21B6;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500;margin-right:3px}
 .auto-yes{color:var(--accent);font-weight:500}
 .auto-no{color:var(--text-3)}
-
 .edit-btn{padding:4px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;cursor:pointer;font-size:12px;color:var(--text-2);font-family:var(--font);transition:all .15s}
-.edit-btn:hover{background:var(--bg);color:var(--text);border-color:var(--border-strong)}
+.edit-btn:hover{background:var(--bg);color:var(--text)}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-3)}
-.empty-icon{font-size:32px;margin-bottom:12px}
-.empty-text{font-size:14px}
-
-/* EXEC VIEW */
-.exec-toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:18px}
 .ms-grid{display:flex;flex-direction:column;gap:14px}
 .ms-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .ms-hdr{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s;user-select:none}
@@ -121,16 +118,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .tp-meta{margin-left:auto;font-size:12px;color:var(--text-3)}
 .tr-list{display:flex;flex-direction:column;gap:6px}
 .tr-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s}
-.tr-item:hover{border-color:var(--accent);box-shadow:0 0 0 2px rgba(30,107,78,.08)}
+.tr-item:hover{border-color:var(--accent)}
 .tr-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#92400E;background:#FEF3C7;padding:2px 7px;border-radius:4px}
 .tr-name{font-size:13px;font-weight:500}
 .tr-progress{display:flex;align-items:center;gap:6px;margin-left:auto}
 .prog-bar{width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.prog-fill{height:100%;background:var(--accent);border-radius:3px}
 .prog-text{font-size:11px;color:var(--text-3);min-width:40px}
-.tr-arr{color:var(--text-3);font-size:12px}
-
-/* RUN DETAIL */
 .run-detail{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
 .run-detail-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--bg)}
 .run-back{cursor:pointer;color:var(--text-2);font-size:13px;display:flex;align-items:center;gap:5px;font-weight:500;padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);transition:all .15s}
@@ -144,18 +138,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .run-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .run-table tr:last-child td{border-bottom:none}
 .run-table tbody tr:hover td{background:#FAFAF8}
-.result-sel{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface);color:var(--text);font-family:var(--font);cursor:pointer;outline:none;transition:border .15s}
-.result-sel:focus{border-color:var(--accent)}
+.result-sel{padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface);color:var(--text);font-family:var(--font);cursor:pointer;outline:none}
 .assignee{display:inline-flex;align-items:center;gap:6px;font-size:13px}
-.av{width:22px;height:22px;border-radius:50%;background:var(--accent-bg);color:var(--accent);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(30,107,78,.2)}
-
-/* MODAL */
+.av{width:22px;height:22px;border-radius:50%;background:var(--accent-bg);color:var(--accent);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(2px)}
 .overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);width:680px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.15)}
 .modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center}
 .modal-title{font-weight:600;font-size:16px;flex:1}
-.modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-3);line-height:1;padding:2px 6px;border-radius:4px;transition:all .15s}
+.modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-3);line-height:1;padding:2px 6px;border-radius:4px}
 .modal-close:hover{background:var(--bg);color:var(--text)}
 .modal-body{padding:22px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field{display:flex;flex-direction:column;gap:6px}
@@ -166,18 +157,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .field input[readonly]{background:var(--bg);color:var(--text-3)}
 .field textarea{resize:vertical;min-height:72px;line-height:1.6}
 .modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-
-/* NEW PROJECT MODAL */
 .sm-modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);width:400px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
-.sm-modal .modal-body{display:flex;flex-direction:column;gap:14px;grid-template-columns:none}
-
-/* SCROLLBAR */
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.toast.show{opacity:1}
+/* Loading */
+.loading-bar{position:fixed;top:0;left:0;height:2px;background:var(--accent);width:0;transition:width .3s;z-index:300}
 ::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
 </style>
 </head>
 <body>
+
+<div class="loading-bar" id="loadingBar"></div>
+<div class="toast" id="toast"></div>
 
 <div class="app">
   <div class="sidebar">
@@ -191,19 +184,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
       <button class="add-proj-btn" onclick="openNewProj()">+ 新增專案</button>
     </div>
   </div>
-
   <div class="main">
     <div class="topbar">
       <button class="tab-btn active" id="tabCases" onclick="switchTab('cases')">Test Cases</button>
       <button class="tab-btn" id="tabExec" onclick="switchTab('exec')">執行管理</button>
-      <div class="topbar-mid">
-        <span class="proj-crumb" id="projCrumb"></span>
-      </div>
+      <div class="topbar-mid"><span class="proj-crumb" id="projCrumb"></span></div>
       <div class="topbar-right">
         <button class="btn btn-primary" id="addBtn" onclick="openAdd()">+ 新增案例</button>
       </div>
     </div>
-    <div class="content" id="content"></div>
+    <div class="content" id="content"><div class="empty-state">連線中...</div></div>
   </div>
 </div>
 
@@ -215,7 +205,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
       <button class="modal-close" onclick="closeModal()">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <div class="field"><label>ID</label><input id="fId" placeholder="TC-001" readonly></div>
+      <div class="field"><label>ID</label><input id="fId" readonly></div>
       <div class="field"><label>Category</label>
         <select id="fCat"><option>Functional</option><option>UI/UX</option><option>Performance</option><option>Security</option><option>Integration</option><option>Regression</option></select>
       </div>
@@ -227,7 +217,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
         <select id="fStatus"><option value="Enable">Enable</option><option value="Disable">Disable</option></select>
       </div>
       <div class="field full"><label>Pre-condition</label><textarea id="fPre" placeholder="執行前提條件..."></textarea></div>
-      <div class="field full"><label>Steps</label><textarea id="fStep" style="min-height:96px" placeholder="1. 步驟一&#10;2. 步驟二&#10;3. 步驟三"></textarea></div>
+      <div class="field full"><label>Steps</label><textarea id="fStep" style="min-height:96px" placeholder="1. 步驟一&#10;2. 步驟二"></textarea></div>
       <div class="field full"><label>Expected Result</label><textarea id="fExp" placeholder="預期結果..."></textarea></div>
       <div class="field"><label>Auto Cover</label>
         <select id="fAuto"><option value="Yes">Yes</option><option value="No" selected>No</option><option value="Partial">Partial</option></select>
@@ -236,6 +226,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
       <div class="field"><label>Creator</label><input id="fCreator" placeholder="名字"></div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-danger" id="deleteBtn" onclick="deleteCase()" style="margin-right:auto;display:none">刪除</button>
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="saveCase()">儲存</button>
     </div>
@@ -261,79 +252,102 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 </div>
 
 <script>
+const priColor = {Critical:'p-critical',High:'p-high',Medium:'p-medium',Low:'p-low'};
 const state = {
-  projects: [
-    {id:'p1', name:'Web Portal', desc:'主要網頁入口'},
-    {id:'p2', name:'Mobile App', desc:'iOS & Android'}
-  ],
-  cases: {
-    p1:[
-      {id:'TC-001',title:'使用者登入 - 正確帳密',cat:'Functional',pri:'Critical',pre:'使用者已有帳號',step:'1. 開啟登入頁\n2. 輸入正確帳密\n3. 點擊登入',exp:'成功跳轉至首頁',auto:'Yes',ai:'login,auth',creator:'Alice',status:'Enable'},
-      {id:'TC-002',title:'使用者登入 - 錯誤密碼',cat:'Functional',pri:'High',pre:'使用者已有帳號',step:'1. 開啟登入頁\n2. 輸入錯誤密碼\n3. 點擊登入',exp:'顯示錯誤訊息',auto:'Yes',ai:'login',creator:'Alice',status:'Enable'},
-      {id:'TC-003',title:'商品加入購物車',cat:'Functional',pri:'High',pre:'使用者已登入',step:'1. 搜尋商品\n2. 點擊加入購物車',exp:'購物車數量+1',auto:'No',ai:'cart,checkout',creator:'Bob',status:'Enable'},
-      {id:'TC-004',title:'結帳流程驗證',cat:'Integration',pri:'Critical',pre:'購物車有商品',step:'1. 進入結帳\n2. 填寫地址\n3. 付款',exp:'訂單成立',auto:'Partial',ai:'checkout,payment',creator:'Carol',status:'Enable'},
-      {id:'TC-005',title:'頁面載入速度',cat:'Performance',pri:'Medium',pre:'網路正常',step:'1. 開啟首頁\n2. 計時',exp:'< 2s',auto:'Yes',ai:'perf',creator:'Bob',status:'Disable'},
-    ],
-    p2:[
-      {id:'TC-001',title:'App 啟動畫面',cat:'UI/UX',pri:'Medium',pre:'App 已安裝',step:'1. 啟動 App',exp:'顯示 Splash 畫面',auto:'No',ai:'launch',creator:'Dave',status:'Enable'},
-      {id:'TC-002',title:'推播通知接收',cat:'Functional',pri:'High',pre:'已允許通知',step:'1. 觸發通知\n2. 觀察推播',exp:'收到推播',auto:'No',ai:'push,notification',creator:'Dave',status:'Enable'},
-    ]
-  },
-  milestones: {
-    p1:[
-      {id:'ms1', name:'Q2 2025 Release', open:true, plans:[
-        {id:'tp1', name:'Login & Auth 測試計劃', runs:[
-          {id:'tr1', name:'Smoke Test Run', cases:[
-            {tcId:'TC-001',runId:'TR-001',assignee:'Alice',result:'Pass'},
-            {tcId:'TC-002',runId:'TR-002',assignee:'Alice',result:'Pass'},
-          ]},
-          {id:'tr2', name:'Regression Run', cases:[
-            {tcId:'TC-001',runId:'TR-003',assignee:'Bob',result:'Pass'},
-            {tcId:'TC-002',runId:'TR-004',assignee:'Carol',result:'Fail'},
-            {tcId:'TC-003',runId:'TR-005',assignee:'Bob',result:'Pending'},
-          ]}
-        ]},
-        {id:'tp2', name:'Checkout 測試計劃', runs:[
-          {id:'tr3', name:'Integration Run', cases:[
-            {tcId:'TC-003',runId:'TR-006',assignee:'Carol',result:'Skip'},
-            {tcId:'TC-004',runId:'TR-007',assignee:'Alice',result:'Pending'},
-          ]}
-        ]}
-      ]},
-      {id:'ms2', name:'Q3 2025 Release', open:false, plans:[
-        {id:'tp3', name:'Performance Plan', runs:[
-          {id:'tr4', name:'Load Test Run', cases:[
-            {tcId:'TC-005',runId:'TR-008',assignee:'Dave',result:'Pending'},
-          ]}
-        ]}
-      ]}
-    ],
-    p2:[
-      {id:'ms3', name:'v1.0 Launch', open:true, plans:[
-        {id:'tp4', name:'Core Features Plan', runs:[
-          {id:'tr5', name:'Sanity Run', cases:[
-            {tcId:'TC-001',runId:'TR-009',assignee:'Dave',result:'Pass'},
-            {tcId:'TC-002',runId:'TR-010',assignee:'Dave',result:'Pending'},
-          ]}
-        ]}
-      ]}
-    ]
-  },
-  currentProj: 'p1',
+  projects: [],
+  cases: {},
+  milestones: {},
+  currentProj: null,
   currentTab: 'cases',
   editingCase: null,
   viewingRun: null,
-  caseCounter: {p1:6, p2:3},
-  msOpen: {}
+  msOpen: {},
+  db: null,
+  fs: null,
+  unsubscribers: []
 };
 
-const priColor = {Critical:'p-critical',High:'p-high',Medium:'p-medium',Low:'p-low'};
-const avColors = ['#1E6B4E','#1E40AF','#92400E','#5B21B6','#991B1B'];
 function av(name){return (name||'?').slice(0,2).toUpperCase();}
 
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function setLoading(on){
+  document.getElementById('loadingBar').style.width=on?'70%':'100%';
+  if(!on)setTimeout(()=>{document.getElementById('loadingBar').style.width='0';},400);
+}
+
+// ── Firebase helpers ──
+async function loadProjects(){
+  const {collection,getDocs}=state.fs;
+  const snap=await getDocs(collection(state.db,'projects'));
+  state.projects=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!state.currentProj && state.projects.length>0) state.currentProj=state.projects[0].id;
+  renderSidebar();
+}
+
+function subscribeToProject(projId){
+  state.unsubscribers.forEach(u=>u());
+  state.unsubscribers=[];
+  const {collection,onSnapshot}=state.fs;
+
+  // cases
+  const unsubCases=onSnapshot(collection(state.db,'projects',projId,'cases'),snap=>{
+    state.cases[projId]=snap.docs.map(d=>({...d.data()}));
+    renderSidebar();
+    if(state.currentTab==='cases') renderCases();
+  });
+
+  // milestones
+  const unsubMS=onSnapshot(collection(state.db,'projects',projId,'milestones'),snap=>{
+    state.milestones[projId]=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(state.currentTab==='exec') renderExec();
+  });
+
+  state.unsubscribers=[unsubCases,unsubMS];
+}
+
+async function saveProjectToFS(proj){
+  const {doc,setDoc}=state.fs;
+  await setDoc(doc(state.db,'projects',proj.id),{name:proj.name,desc:proj.desc||''});
+}
+
+async function saveCaseToFS(projId,caseData){
+  const {doc,setDoc}=state.fs;
+  setLoading(true);
+  await setDoc(doc(state.db,'projects',projId,'cases',caseData.id),caseData);
+  setLoading(false);
+  showToast('✓ 已儲存');
+}
+
+async function deleteCaseFromFS(projId,caseId){
+  const {doc,deleteDoc}=state.fs;
+  setLoading(true);
+  await deleteDoc(doc(state.db,'projects',projId,'cases',caseId));
+  setLoading(false);
+  showToast('已刪除');
+}
+
+async function saveRunResultToFS(projId,msId,tpId,trId,runCaseId,val){
+  const ms=(state.milestones[projId]||[]).find(m=>m.id===msId);
+  if(!ms)return;
+  const tp=ms.plans.find(p=>p.id===tpId);
+  if(!tp)return;
+  const tr=tp.runs.find(r=>r.id===trId);
+  if(!tr)return;
+  const rc=tr.cases.find(c=>c.runId===runCaseId);
+  if(rc)rc.result=val;
+  const {doc,setDoc}=state.fs;
+  await setDoc(doc(state.db,'projects',projId,'milestones',msId),ms);
+  showToast('✓ 已儲存結果');
+}
+
+// ── UI ──
 function switchTab(t){
-  state.currentTab=t;
-  state.viewingRun=null;
+  state.currentTab=t;state.viewingRun=null;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(t==='cases'?'tabCases':'tabExec').classList.add('active');
   document.getElementById('addBtn').style.display=t==='cases'?'':'none';
@@ -341,8 +355,8 @@ function switchTab(t){
 }
 
 function setProject(id){
-  state.currentProj=id;
-  state.viewingRun=null;
+  state.currentProj=id;state.viewingRun=null;
+  subscribeToProject(id);
   render();
 }
 
@@ -360,11 +374,11 @@ function renderSidebar(){
 }
 
 function renderCases(){
+  if(!state.currentProj){document.getElementById('content').innerHTML='<div class="empty-state">請先建立或選擇專案</div>';return;}
   const cases=state.cases[state.currentProj]||[];
   document.getElementById('content').innerHTML=`
     <div class="tc-toolbar">
       <div class="search-wrap">
-        <span class="search-icon">&#x2315;</span>
         <input class="search-box" placeholder="搜尋 ID、Title、Creator..." oninput="filterCases(this.value)" id="searchBox">
       </div>
       <select class="filter-sel" onchange="filterCases(document.getElementById('searchBox').value)" id="catFilter">
@@ -398,9 +412,9 @@ function renderCases(){
 function renderRows(cases){
   const body=document.getElementById('tcBody');
   if(!body)return;
-  document.getElementById('tcCount').textContent=cases.length+' 個案例';
+  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent=cases.length+' 個案例';
   if(!cases.length){
-    body.innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#x1F50D;</div><div class="empty-text">找不到測試案例</div></div></td></tr>`;
+    body.innerHTML=`<tr><td colspan="9"><div class="empty-state" style="padding:40px">尚無測試案例，點右上角新增</div></td></tr>`;
     return;
   }
   body.innerHTML=cases.map(c=>`
@@ -423,9 +437,7 @@ function filterCases(q){
   const pri=document.getElementById('priFilter')?.value||'';
   const filtered=cases.filter(c=>{
     const matchQ=!q||(c.title+c.id+c.creator+(c.ai||'')).toLowerCase().includes(q.toLowerCase());
-    const matchCat=!cat||c.cat===cat;
-    const matchPri=!pri||c.pri===pri;
-    return matchQ&&matchCat&&matchPri;
+    return matchQ&&(!cat||c.cat===cat)&&(!pri||c.pri===pri);
   });
   renderRows(filtered);
 }
@@ -434,107 +446,104 @@ function renderExec(){
   if(state.viewingRun){renderRunDetail();return;}
   const ms=state.milestones[state.currentProj]||[];
   document.getElementById('content').innerHTML=`
-    <div class="exec-toolbar">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:18px">
       <button class="btn">+ Milestone</button>
       <button class="btn">+ Test Plan</button>
       <button class="btn btn-primary">+ Test Run</button>
     </div>
-    <div class="ms-grid">${ms.length?ms.map(renderMS).join(''):`<div style="text-align:center;padding:60px;color:var(--text-3)"><div style="font-size:32px;margin-bottom:12px">&#x1F4CB;</div><div>尚無執行計劃</div></div>`}</div>`;
+    <div class="ms-grid">${ms.length?ms.map(renderMS).join(''):`<div class="empty-state">尚無執行計劃</div>`}</div>`;
 }
 
 function renderMS(ms){
   const isOpen=state.msOpen[ms.id]===undefined?ms.open:state.msOpen[ms.id];
-  const totalRuns=ms.plans.reduce((s,p)=>s+p.runs.length,0);
-  const totalCases=ms.plans.reduce((s,p)=>p.runs.reduce((ss,r)=>ss+r.cases.length,s),0);
-  const passed=ms.plans.reduce((s,p)=>p.runs.reduce((ss,r)=>ss+r.cases.filter(c=>c.result==='Pass').length,s),0);
+  const totalCases=(ms.plans||[]).reduce((s,p)=>(p.runs||[]).reduce((ss,r)=>ss+(r.cases||[]).length,s),0);
+  const passed=(ms.plans||[]).reduce((s,p)=>(p.runs||[]).reduce((ss,r)=>ss+(r.cases||[]).filter(c=>c.result==='Pass').length,s),0);
   return `<div class="ms-card">
     <div class="ms-hdr" onclick="toggleMS('${ms.id}')">
       <span class="ms-label">MS</span>
       <span class="ms-title">${ms.name}</span>
       <span class="ms-meta">
-        <span>${ms.plans.length} plans</span>
-        <span>${totalRuns} runs</span>
+        <span>${(ms.plans||[]).length} plans</span>
         <span style="color:var(--accent);font-weight:600">${passed}/${totalCases} Pass</span>
       </span>
       <span class="ms-chevron${isOpen?' open':''}">&#x276F;</span>
     </div>
     <div class="ms-body${isOpen?' open':''}">
-      <div class="tp-list">${ms.plans.map(tp=>renderTP(tp)).join('')}</div>
+      <div class="tp-list">${(ms.plans||[]).map(tp=>renderTP(tp,ms.id)).join('')}</div>
     </div>
   </div>`;
 }
 
-function renderTP(tp){
+function renderTP(tp,msId){
   return `<div class="tp-card">
     <div class="tp-row">
       <span class="tp-label">PLAN</span>
       <span class="tp-name">${tp.name}</span>
-      <span class="tp-meta">${tp.runs.length} test runs</span>
+      <span class="tp-meta">${(tp.runs||[]).length} test runs</span>
     </div>
-    <div class="tr-list">${tp.runs.map(tr=>renderTR(tr)).join('')}</div>
+    <div class="tr-list">${(tp.runs||[]).map(tr=>renderTR(tr,msId,tp.id)).join('')}</div>
   </div>`;
 }
 
-function renderTR(tr){
-  const total=tr.cases.length;
-  const passed=tr.cases.filter(c=>c.result==='Pass').length;
+function renderTR(tr,msId,tpId){
+  const total=(tr.cases||[]).length;
+  const passed=(tr.cases||[]).filter(c=>c.result==='Pass').length;
   const pct=total?Math.round(passed/total*100):0;
-  return `<div class="tr-item" onclick="viewRun('${tr.id}')">
+  return `<div class="tr-item" onclick="viewRun('${msId}','${tpId}','${tr.id}')">
     <span class="tr-label">RUN</span>
     <span class="tr-name">${tr.name}</span>
     <span class="tr-progress">
       <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
       <span class="prog-text">${passed}/${total} Pass</span>
     </span>
-    <span class="tr-arr">&#x276F;</span>
+    <span style="color:var(--text-3);font-size:12px">&#x276F;</span>
   </div>`;
 }
 
 function toggleMS(id){
   const cur=state.msOpen[id]===undefined?(state.milestones[state.currentProj]||[]).find(m=>m.id===id)?.open:state.msOpen[id];
-  state.msOpen[id]=!cur;
-  renderExec();
+  state.msOpen[id]=!cur;renderExec();
 }
 
-function viewRun(runId){state.viewingRun=runId;renderRunDetail();}
+function viewRun(msId,tpId,trId){state.viewingRun={msId,tpId,trId};renderRunDetail();}
 
-function findRun(runId){
-  for(const m of state.milestones[state.currentProj]||[])
-    for(const tp of m.plans)
-      for(const tr of tp.runs)
-        if(tr.id===runId)return tr;
-  return null;
+function findRun(){
+  if(!state.viewingRun)return null;
+  const {msId,tpId,trId}=state.viewingRun;
+  const ms=(state.milestones[state.currentProj]||[]).find(m=>m.id===msId);
+  if(!ms)return null;
+  const tp=(ms.plans||[]).find(p=>p.id===tpId);
+  if(!tp)return null;
+  return {ms,tp,tr:(tp.runs||[]).find(r=>r.id===trId)};
 }
 
 function renderRunDetail(){
-  const run=findRun(state.viewingRun);
-  if(!run){state.viewingRun=null;renderExec();return;}
+  const found=findRun();
+  if(!found||!found.tr){state.viewingRun=null;renderExec();return;}
+  const {ms,tp,tr}=found;
   const cases=state.cases[state.currentProj]||[];
-  const passed=run.cases.filter(c=>c.result==='Pass').length;
-  const failed=run.cases.filter(c=>c.result==='Fail').length;
-  const rows=run.cases.map(rc=>{
+  const passed=(tr.cases||[]).filter(c=>c.result==='Pass').length;
+  const failed=(tr.cases||[]).filter(c=>c.result==='Fail').length;
+  const rows=(tr.cases||[]).map(rc=>{
     const tc=cases.find(c=>c.id===rc.tcId)||{title:rc.tcId,pri:'Medium',cat:'-'};
     return `<tr>
-      <td class="id-cell">${rc.runId}</td>
-      <td class="id-cell">${rc.tcId}</td>
-      <td style="font-weight:500;color:var(--text)">${tc.title}</td>
+      <td class="id-cell">${rc.runId}</td><td class="id-cell">${rc.tcId}</td>
+      <td style="font-weight:500">${tc.title}</td>
       <td><span class="badge ${priColor[tc.pri]||'p-medium'}">${tc.pri}</span></td>
       <td><span class="cat-badge">${tc.cat}</span></td>
       <td><div class="assignee"><div class="av">${av(rc.assignee)}</div>${rc.assignee||'—'}</div></td>
-      <td>
-        <select class="result-sel" onchange="updateResult('${state.viewingRun}','${rc.runId}',this.value)">
-          ${['Pending','Pass','Fail','Skip'].map(r=>`<option${r===rc.result?' selected':''}>${r}</option>`).join('')}
-        </select>
-      </td>
+      <td><select class="result-sel" onchange="updateResult('${ms.id}','${tp.id}','${tr.id}','${rc.runId}',this.value)">
+        ${['Pending','Pass','Fail','Skip'].map(r=>`<option${r===rc.result?' selected':''}>${r}</option>`).join('')}
+      </select></td>
     </tr>`;
   }).join('');
   document.getElementById('content').innerHTML=`
     <div class="run-detail">
       <div class="run-detail-hdr">
         <div class="run-back" onclick="backToExec()">&#x2190; 執行管理</div>
-        <span class="run-title">${run.name}</span>
+        <span class="run-title">${tr.name}</span>
         <div class="run-stats">
-          <span class="run-stat"><strong>${run.cases.length}</strong> 案例</span>
+          <span class="run-stat"><strong>${(tr.cases||[]).length}</strong> 案例</span>
           <span class="run-stat" style="color:var(--accent)"><strong>${passed}</strong> Pass</span>
           <span class="run-stat" style="color:#991B1B"><strong>${failed}</strong> Fail</span>
         </div>
@@ -545,20 +554,14 @@ function renderRunDetail(){
           <col style="width:85px"><col style="width:75px"><col style="width:auto">
           <col style="width:85px"><col style="width:110px"><col style="width:120px"><col style="width:100px">
         </colgroup>
-        <thead><tr>
-          <th>Run ID</th><th>Case ID</th><th>Title</th>
-          <th>Priority</th><th>Category</th><th>Assignee</th><th>Result</th>
-        </tr></thead>
+        <thead><tr><th>Run ID</th><th>Case ID</th><th>Title</th><th>Priority</th><th>Category</th><th>Assignee</th><th>Result</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
     </div>`;
 }
 
-function updateResult(runId,runCaseId,val){
-  for(const m of state.milestones[state.currentProj]||[])
-    for(const tp of m.plans)
-      for(const tr of tp.runs)
-        if(tr.id===runId){const rc=tr.cases.find(c=>c.runId===runCaseId);if(rc)rc.result=val;}
+function updateResult(msId,tpId,trId,runCaseId,val){
+  saveRunResultToFS(state.currentProj,msId,tpId,trId,runCaseId,val);
 }
 
 function backToExec(){state.viewingRun=null;renderExec();}
@@ -570,9 +573,10 @@ function render(){
 }
 
 function openAdd(){
+  if(!state.currentProj){showToast('請先選擇專案');return;}
   state.editingCase=null;
-  const proj=state.currentProj;
-  const n=state.caseCounter[proj]||1;
+  const cases=state.cases[state.currentProj]||[];
+  const n=cases.length+1;
   document.getElementById('fId').value='TC-'+String(n).padStart(3,'0');
   ['fTitle','fPre','fStep','fExp','fAI','fCreator'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fCat').value='Functional';
@@ -580,6 +584,7 @@ function openAdd(){
   document.getElementById('fStatus').value='Enable';
   document.getElementById('fAuto').value='No';
   document.getElementById('modalTitle').textContent='新增測試案例';
+  document.getElementById('deleteBtn').style.display='none';
   document.getElementById('caseModal').classList.add('open');
 }
 
@@ -592,21 +597,20 @@ function openEdit(id){
   document.getElementById('fCat').value=c.cat;
   document.getElementById('fPri').value=c.pri;
   document.getElementById('fStatus').value=c.status;
-  document.getElementById('fPre').value=c.pre;
-  document.getElementById('fStep').value=c.step;
-  document.getElementById('fExp').value=c.exp;
+  document.getElementById('fPre').value=c.pre||'';
+  document.getElementById('fStep').value=c.step||'';
+  document.getElementById('fExp').value=c.exp||'';
   document.getElementById('fAuto').value=c.auto;
   document.getElementById('fAI').value=c.ai||'';
-  document.getElementById('fCreator').value=c.creator;
+  document.getElementById('fCreator').value=c.creator||'';
   document.getElementById('modalTitle').textContent='編輯測試案例';
+  document.getElementById('deleteBtn').style.display='';
   document.getElementById('caseModal').classList.add('open');
 }
 
 function closeModal(){document.getElementById('caseModal').classList.remove('open');}
 
-function saveCase(){
-  const proj=state.currentProj;
-  if(!state.cases[proj])state.cases[proj]=[];
+async function saveCase(){
   const data={
     id:document.getElementById('fId').value,
     title:document.getElementById('fTitle').value||'(未命名)',
@@ -620,15 +624,15 @@ function saveCase(){
     ai:document.getElementById('fAI').value,
     creator:document.getElementById('fCreator').value
   };
-  if(state.editingCase){
-    const idx=state.cases[proj].findIndex(c=>c.id===state.editingCase);
-    if(idx>=0)state.cases[proj][idx]=data;
-  } else {
-    state.cases[proj].push(data);
-    state.caseCounter[proj]=(state.caseCounter[proj]||1)+1;
-  }
   closeModal();
-  render();
+  await saveCaseToFS(state.currentProj,data);
+}
+
+async function deleteCase(){
+  if(!state.editingCase)return;
+  if(!confirm('確定要刪除這個測試案例？'))return;
+  closeModal();
+  await deleteCaseFromFS(state.currentProj,state.editingCase);
 }
 
 function openNewProj(){
@@ -637,20 +641,28 @@ function openNewProj(){
   document.getElementById('projModal').classList.add('open');
 }
 function closeProjModal(){document.getElementById('projModal').classList.remove('open');}
-function saveProject(){
+
+async function saveProject(){
   const name=document.getElementById('pjName').value.trim();
   if(!name)return;
-  const id='p'+Date.now();
-  state.projects.push({id,name,desc:document.getElementById('pjDesc').value});
-  state.cases[id]=[];
-  state.milestones[id]=[];
-  state.caseCounter[id]=1;
+  const id='proj_'+Date.now();
+  const proj={id,name,desc:document.getElementById('pjDesc').value};
   closeProjModal();
+  await saveProjectToFS(proj);
+  await loadProjects();
   setProject(id);
-  render();
 }
 
-render();
+// ── Init ──
+window.addEventListener('firebase-ready',async()=>{
+  state.db=window._db;
+  state.fs=window._fsHelpers;
+  setLoading(true);
+  await loadProjects();
+  if(state.currentProj) subscribeToProject(state.currentProj);
+  render();
+  setLoading(false);
+});
 </script>
 </body>
 </html>
